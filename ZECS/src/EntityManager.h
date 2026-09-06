@@ -15,5 +15,9 @@ namespace ZECS
 	private:
 		Slot m_slots[MAX_ENTITIES]{};
 		unsigned short m_free_list_head;
+
+	public:
+		const Slot& GetSlot(unsigned short index) const { return m_slots[index]; }
+		unsigned short GetFreeListHead() const { return m_free_list_head; }
 	};
 }

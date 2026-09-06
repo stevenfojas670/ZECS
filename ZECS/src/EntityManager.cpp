@@ -2,12 +2,13 @@
 
 #include "EntityManager.h"
 #include "Core.h"
+#include <iostream>
 
 namespace ZECS
 {
 	EntityManager::EntityManager() : m_free_list_head(0)
 	{
-		for (size_t i = 1; i < MAX_ENTITIES; i++)
+		for (size_t i = 0; i < MAX_ENTITIES; i++)
 		{
 			m_slots[i].generation = 0;
 			m_slots[i].isOccupied = false;
@@ -55,6 +56,8 @@ namespace ZECS
 
 		if (!is_valid(h, this->m_slots))
 		{
+			std::cout << "Error: Attempted to destroy invalid or already dead Handle [index: "
+				<< idx << "]\n";
 			return;
 		}
 

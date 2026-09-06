@@ -42,12 +42,6 @@ namespace ZECS
 		bool isOccupied;
 	};
 
-	/// <summary>
-	/// Verify if the slot is valid
-	/// </summary>
-	/// <param name="h"></param>
-	/// <param name="slots"></param>
-	/// <returns></returns>
 	inline bool is_valid(const Handle& h, const Slot* slots)
 	{
 		unsigned short idx = index(h);
