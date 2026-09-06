@@ -11,8 +11,9 @@ namespace ZECS
 		~EntityManager();
 		Handle CreateEntity();
 		void DestroyEntity(const Handle&);
+		bool IsAlive(const Handle&) const;
 	private:
-		Slot slots[MAX_ENTITIES]{};
-		unsigned short free_list_head;
+		Slot m_slots[MAX_ENTITIES]{};
+		unsigned short m_free_list_head;
 	};
 }

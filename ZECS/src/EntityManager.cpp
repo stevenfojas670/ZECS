@@ -5,14 +5,14 @@
 
 namespace ZECS
 {
-	EntityManager::EntityManager() : free_list_head(0)
+	EntityManager::EntityManager() : m_free_list_head(1)
 	{
 		for (size_t i = 0; i < MAX_ENTITIES; i++)
 		{
-			slots[i].generation = 0;
-			slots[i].isOccupied = false;
+			m_slots[i].generation = 0;
+			m_slots[i].isOccupied = false;
 
-			slots[i].next_free = (i + 1 < MAX_ENTITIES)
+			m_slots[i].next_free = (i + 1 < MAX_ENTITIES)
 				? static_cast<unsigned short>(i + 1)
 				: NULL_INDEX;
 		}
@@ -31,36 +31,41 @@ namespace ZECS
 		* We could crash clear the entire Slot area of a certain type of item that wouldn't break
 		* like Halo 3 did.
 		*/
-		if (this->free_list_head == NULL_INDEX)
+		if (this->m_free_list_head == NULL_INDEX)
 		{
 			// Log some type of error
 			return Handle{ 0 };
 		}
 
 		// Good state, insert
-		unsigned short idx = this->free_list_head;
+		unsigned short idx = this->m_free_list_head;
 
-		this->slots[free_list_head].isOccupied = true;
-		this->free_list_head = this->slots[free_list_head].next_free;
+		this->m_slots[m_free_list_head].isOccupied = true;
+		this->m_free_list_head = this->m_slots[m_free_list_head].next_free;
 
 		Handle h;
-		h.id = handle(idx, this->slots[idx].generation);
+		h.id = handle(idx, this->m_slots[idx].generation);
 		return h;
 	}
 
 	void EntityManager::DestroyEntity(const Handle& h)
 	{
 		unsigned short idx = index(h);
-		Slot& currentSlot = this->slots[index(h)];
+		Slot& currentSlot = this->m_slots[index(h)];
 
-		if (!is_valid(h, this->slots))
+		if (!is_valid(h, this->m_slots))
 		{
 			return;
 		}
 
 		currentSlot.generation++;
 		currentSlot.isOccupied = false;
-		currentSlot.next_free = this->free_list_head;
-		this->free_list_head = idx;
+		currentSlot.next_free = this->m_free_list_head;
+		this->m_free_list_head = idx;
+	}
+
+	bool EntityManager::IsAlive(const Handle& h) const
+	{
+		return is_valid(h, this->m_slots);
 	}
 }
