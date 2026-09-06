@@ -5,9 +5,9 @@
 
 namespace ZECS
 {
-	EntityManager::EntityManager() : m_free_list_head(1)
+	EntityManager::EntityManager() : m_free_list_head(0)
 	{
-		for (size_t i = 0; i < MAX_ENTITIES; i++)
+		for (size_t i = 1; i < MAX_ENTITIES; i++)
 		{
 			m_slots[i].generation = 0;
 			m_slots[i].isOccupied = false;
@@ -34,7 +34,7 @@ namespace ZECS
 		if (this->m_free_list_head == NULL_INDEX)
 		{
 			// Log some type of error
-			return Handle{ 0 };
+			return Handle{ NULL_INDEX };
 		}
 
 		// Good state, insert
