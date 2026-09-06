@@ -1,12 +1,18 @@
 #pragma once
 
+#ifdef ZECS_BUILD_DLL
+#define ZECS_API __declspec(dllexport)
+#else
+#define ZECS_API __declspec(dllimport)
+#endif
+
 namespace ZECS
 {
 	constexpr size_t MAX_ENTITIES = 1 << 16;
 
 	struct Handle
 	{
-		unsigned short id; // [generation:16][index:16]
+		unsigned int id; // [generation:16][index:16]
 	};
 
 	constexpr unsigned short INDEX_MASK = 0xFFFF;
@@ -21,6 +27,13 @@ namespace ZECS
 	{
 		return h.id >> GENERATION_SHIFT;
 	}
+
+	inline unsigned int handle(unsigned int index, unsigned int generation)
+	{
+		return (generation << GENERATION_SHIFT) | index;
+	}
+
+	constexpr unsigned short NULL_INDEX = 0xFFFF;
 
 	struct Slot
 	{

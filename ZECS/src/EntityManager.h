@@ -4,14 +4,15 @@
 
 namespace ZECS
 {
-	class EntityManager
+	class ZECS_API EntityManager
 	{
 	public:
 		EntityManager();
 		~EntityManager();
-		unsigned int CreateEntity();
-		void DestroyEntity();
+		Handle CreateEntity();
+		void DestroyEntity(const Handle&);
 	private:
-		Slot slots[]
+		Slot slots[MAX_ENTITIES]{};
+		unsigned short free_list_head;
 	};
 }
