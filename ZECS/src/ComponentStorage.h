@@ -12,6 +12,9 @@ namespace ZECS
 		~ComponentStorage();
 		void Insert(unsigned short id, T data);
 		void Remove(unsigned short id);
+		bool Has(unsigned short id) const;
+		T& Get(unsigned short id);
+		int Size() const { return size; }
 	private:
 		unsigned short m_sparseSet[MAX_ENTITIES];
 		unsigned short m_denseId[MAX_ENTITIES];
@@ -22,7 +25,8 @@ namespace ZECS
 	template <typename T>
 	ComponentStorage<T>::ComponentStorage() : size(0)
 	{
-
+		for (size_t i = 0; i < MAX_ENTITIES; i++)
+			this->m_sparseSet[i] = NULL_INDEX;
 	}
 
 	template <typename T>
@@ -43,6 +47,8 @@ namespace ZECS
 	template <typename T>
 	void ComponentStorage<T>::Remove(unsigned short id)
 	{
+		if (!Has(id)) return;
+
 		unsigned short idx = this->m_sparseSet[id];
 		int last = size - 1;
 
@@ -50,8 +56,20 @@ namespace ZECS
 		{
 			this->m_denseId[idx] = this->m_denseId[last];
 			this->m_denseComponent[idx] = this->m_denseComponent[last];
-			this->m_sparseSet[this->denseId[last]] = idx;
+			this->m_sparseSet[this->m_denseId[last]] = this->m_denseId[last];
 		}
 		size--;
+	}
+
+	template <typename T>
+	bool ComponentStorage<T>::Has(unsigned short id) const
+	{
+		return this->m_sparseSet[id] < size && this->m_denseId[this->m_sparseSet[id]] == id;
+	}
+
+	template <typename T>
+	T& ComponentStorage<T>::Get(unsigned short id)
+	{
+		return this->m_denseComponent[this->m_sparseSet[id]];
 	}
 }
