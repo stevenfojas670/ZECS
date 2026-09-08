@@ -80,6 +80,7 @@ namespace Tests
 		REQUIRE(cs->Get(3)->value == 97);
 		REQUIRE(cs->Has(4) == true);
 		REQUIRE(cs->Get(4)->value == 96);
+		REQUIRE(cs->Size() == 3);
 	}
 
 	TEST_CASE("Remove-Tests: Remove a non-last component", "[ComponentStorage]")
@@ -94,6 +95,7 @@ namespace Tests
 		cs->Remove(0);
 
 		REQUIRE(cs->Has(0) == false);
+		REQUIRE(cs->Size() == 1);
 	}
 
 	TEST_CASE("Remove-Tests: Remove the last component", "[ComponentStorage]")
