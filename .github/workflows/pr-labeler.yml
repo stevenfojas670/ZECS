@@ -1,0 +1,56 @@
+name: PR labeler
+
+on:
+  pull_request:
+    types: [opened, edited, reopened, synchronize]
+
+permissions:
+  pull-requests: write
+  issues: write
+
+jobs:
+  label:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            const map = {
+              'Bug fix': 'bug',
+              'Feature': 'feature',
+              'Refactor': 'refactor',
+              'Test change': 'test',
+              'Documentation': 'documentation',
+              'Experiment': 'experiment',
+              'Build change': 'build',
+            };
+
+            const body = context.payload.pull_request.body || '';
+            const ticked = new Set();
+            for (const line of body.split(/\r?\n/)) {
+              const m = line.match(/^\s*[-*]\s*\[([ xX])\]\s*(.+?)\s*$/);
+              if (m && m[1].toLowerCase() === 'x' && map[m[2]]) {
+                ticked.add(map[m[2]]);
+              }
+            }
+
+            const { owner, repo } = context.repo;
+            const issue_number = context.payload.pull_request.number;
+            const current = new Set(
+              (context.payload.pull_request.labels || []).map(l => l.name)
+            );
+
+            const toAdd = [...ticked].filter(l => !current.has(l));
+            const toRemove = Object.values(map).filter(l => current.has(l) && !ticked.has(l));
+
+            if (toAdd.length) {
+              await github.rest.issues.addLabels({ owner, repo, issue_number, labels: toAdd });
+            }
+            for (const name of toRemove) {
+              try {
+                await github.rest.issues.removeLabel({ owner, repo, issue_number, name });
+              } catch (e) {
+                if (e.status !== 404) throw e;
+              }
+            }
+            core.info(`added: [${toAdd}] removed: [${toRemove}]`);

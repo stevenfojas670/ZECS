@@ -1,12 +1,4 @@
-add_library(ZECS SHARED
-    src/Core.h
-    src/EntityManager.h
-    src/EntityManager.cpp
-)
+add_library(ZECS INTERFACE)
 
 # PUBLIC: consumers of ZECS inherit this include path automatically.
-target_include_directories(ZECS PUBLIC src)
-
-# PRIVATE: ZECS itself compiles with __declspec(dllexport); anything linking
-# against it sees __declspec(dllimport). See ZECS_API in src/Core.h.
-target_compile_definitions(ZECS PRIVATE ZECS_BUILD_DLL)
+target_include_directories(ZECS INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/src)

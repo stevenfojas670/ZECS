@@ -10,6 +10,8 @@ FetchContent_MakeAvailable(Catch2)
 
 add_executable(Test
     EntityManager_Tests.cpp
+    ComponentStorage_Tests.cpp
+    ComponentManager_Tests.cpp
 )
 
 # Catch2WithMain supplies main(), so no test file declares one.

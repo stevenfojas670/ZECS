@@ -1,138 +1,128 @@
-#include <iostream>
-#include <memory>
-#include <sstream>
 #include <catch2/catch_test_macros.hpp>
-#include "EntityManager.h"
+#include "Entities/EntityManager.h"
+#include "Helpers.h"
 
-struct CaptureStdout
+namespace Tests
 {
-	std::stringstream buffer;
-	std::streambuf* oldCout;
+	TEST_CASE("Creating two entities assigns them distinct indices", "[EntityManager][CreateEntity]")
+	{
+		// Heap-allocated: EntityManager embeds Slot[65536] (~384 KB), which is more
+		// than belongs on the default 1 MB stack.
+		auto em = std::make_unique<ZECS::EntityManager>();
 
-	CaptureStdout() : oldCout(std::cout.rdbuf(buffer.rdbuf())) {}
-	~CaptureStdout() { std::cout.rdbuf(oldCout); }
+		ZECS::Handle a = em->CreateEntity();
+		ZECS::Handle b = em->CreateEntity();
 
-	std::string str() const { return buffer.str(); }
-};
+		REQUIRE(ZECS::index(a) != ZECS::index(b));
+	}
 
-TEST_CASE("Distinct live entities occupy distinct slots", "[EntityManager]")
-{
-	// Heap-allocated: EntityManager embeds Slot[65536] (~384 KB), which is more
-	// than belongs on the default 1 MB stack.
-	auto em = std::make_unique<ZECS::EntityManager>();
+	TEST_CASE("Destroying an entity frees its slot and increments its generation", "[EntityManager][DestroyEntity]")
+	{
+		auto em = std::make_unique<ZECS::EntityManager>();
 
-	ZECS::Handle a = em->CreateEntity();
-	ZECS::Handle b = em->CreateEntity();
+		ZECS::Handle a = em->CreateEntity();
+		ZECS::Handle b = em->CreateEntity();
+		ZECS::Handle c = em->CreateEntity();
 
-	REQUIRE(ZECS::index(a) != ZECS::index(b));
-}
+		auto current_free_list_head = em->GetFreeListHead();
 
-TEST_CASE("Remove a single entity", "[EntityManager]")
-{
-	auto em = std::make_unique<ZECS::EntityManager>();
+		em->DestroyEntity(b);
 
-	ZECS::Handle a = em->CreateEntity();
-	ZECS::Handle b = em->CreateEntity();
-	ZECS::Handle c = em->CreateEntity();
+		// We need to verify that index 1 has { gen: 1, isOccupied: false, next_free: 3 }
 
-	auto current_free_list_head = em->GetFreeListHead();
+		auto& slot = em->GetSlot(ZECS::index(b));
 
-	em->DestroyEntity(b);
+		REQUIRE(em->IsAlive(b) == false);
+		REQUIRE(slot.generation == 1);
+		REQUIRE(slot.isOccupied == false);
+		REQUIRE(slot.next_free == current_free_list_head);
+		REQUIRE(em->GetFreeListHead() == 1);
+	}
 
-	// We need to verify that index 1 has { gen: 1, isOccupied: false, next_free: 3 }
+	TEST_CASE("Destroying two entities links the second freed slot to the first", "[EntityManager][DestroyEntity]")
+	{
+		auto em = std::make_unique<ZECS::EntityManager>();
 
-	auto& slot = em->GetSlot(ZECS::index(b));
+		ZECS::Handle a = em->CreateEntity();
+		ZECS::Handle b = em->CreateEntity();
+		ZECS::Handle c = em->CreateEntity();
 
-	REQUIRE(em->IsAlive(b) == false);
-	REQUIRE(slot.generation == 1);
-	REQUIRE(slot.isOccupied == false);
-	REQUIRE(slot.next_free == current_free_list_head);
-	REQUIRE(em->GetFreeListHead() == 1);
-}
+		em->DestroyEntity(a);
+		em->DestroyEntity(b);
 
-TEST_CASE("Remove multiple entities", "[EntityManager]")
-{
-	auto em = std::make_unique<ZECS::EntityManager>();
+		auto& slot = em->GetSlot(ZECS::index(b));
 
-	ZECS::Handle a = em->CreateEntity();
-	ZECS::Handle b = em->CreateEntity();
-	ZECS::Handle c = em->CreateEntity();
+		REQUIRE(slot.next_free == 0);
+	}
 
-	em->DestroyEntity(a);
-	em->DestroyEntity(b);
+	TEST_CASE("Creating entities after destroys reuses freed slots in LIFO order", "[EntityManager][CreateEntity]")
+	{
+		auto em = std::make_unique<ZECS::EntityManager>();
 
-	auto& slot = em->GetSlot(ZECS::index(b));
+		ZECS::Handle a = em->CreateEntity();
+		ZECS::Handle b = em->CreateEntity();
+		ZECS::Handle c = em->CreateEntity();
 
-	REQUIRE(slot.next_free == 0);
-}
+		em->DestroyEntity(a);
+		em->DestroyEntity(b);
 
-TEST_CASE("Remove multiple entities and backfill", "[EntityManager]")
-{
-	auto em = std::make_unique<ZECS::EntityManager>();
+		ZECS::Handle d = em->CreateEntity();
+		ZECS::Handle e = em->CreateEntity();
 
-	ZECS::Handle a = em->CreateEntity();
-	ZECS::Handle b = em->CreateEntity();
-	ZECS::Handle c = em->CreateEntity();
+		auto& slot_0 = em->GetSlot(ZECS::index(a));
+		auto& slot_1 = em->GetSlot(ZECS::index(b));
 
-	em->DestroyEntity(a);
-	em->DestroyEntity(b);
+		REQUIRE(em->GetFreeListHead() == 3);
 
-	ZECS::Handle d = em->CreateEntity();
-	ZECS::Handle e = em->CreateEntity();
+		REQUIRE(slot_0.next_free == 3);
+		REQUIRE(slot_0.generation == 1);
+		REQUIRE(slot_0.isOccupied == true);
+		REQUIRE(ZECS::index(a) == ZECS::index(e));
 
-	auto& slot_0 = em->GetSlot(ZECS::index(a));
-	auto& slot_1 = em->GetSlot(ZECS::index(b));
+		REQUIRE(slot_1.next_free == 0);
+		REQUIRE(slot_1.generation == 1);
+		REQUIRE(slot_1.isOccupied == true);
+		REQUIRE(ZECS::index(d) == ZECS::index(b));
+	}
 
-	REQUIRE(em->GetFreeListHead() == 3);
+	TEST_CASE("Destroying a reused slot increments its generation to 2", "[EntityManager][DestroyEntity]")
+	{
+		auto em = std::make_unique<ZECS::EntityManager>();
 
-	REQUIRE(slot_0.next_free == 3);
-	REQUIRE(slot_0.generation == 1);
-	REQUIRE(slot_0.isOccupied == true);
-	REQUIRE(ZECS::index(a) == ZECS::index(e));
+		ZECS::Handle a = em->CreateEntity();
+		ZECS::Handle b = em->CreateEntity();
 
-	REQUIRE(slot_1.next_free == 0);
-	REQUIRE(slot_1.generation == 1);
-	REQUIRE(slot_1.isOccupied == true);
-	REQUIRE(ZECS::index(d) == ZECS::index(b));
-}
+		em->DestroyEntity(a);
 
-TEST_CASE("Detect multiple generations", "[EntityManager]")
-{
-	auto em = std::make_unique<ZECS::EntityManager>();
+		ZECS::Handle c = em->CreateEntity();
 
-	ZECS::Handle a = em->CreateEntity();
-	ZECS::Handle b = em->CreateEntity();
+		em->DestroyEntity(c);
 
-	em->DestroyEntity(a);
+		auto& slot = em->GetSlot(ZECS::index(c));
 
-	ZECS::Handle c = em->CreateEntity();
+		REQUIRE(slot.generation == 2);
+	}
 
-	em->DestroyEntity(c);
+	TEST_CASE("A destroyed handle is no longer alive", "[EntityManager][IsAlive]")
+	{
+		auto em = std::make_unique<ZECS::EntityManager>();
 
-	auto& slot = em->GetSlot(ZECS::index(c));
+		ZECS::Handle a = em->CreateEntity();
+		em->DestroyEntity(a);
 
-	REQUIRE(slot.generation == 2);
-}
+		REQUIRE(em->IsAlive(a) == false);
+	}
 
-TEST_CASE("Detect a stale entity", "[EntityManager]")
-{
-	auto em = std::make_unique<ZECS::EntityManager>();
+	TEST_CASE("Destroying an entity twice logs an error to the console", "[EntityManager][DestroyEntity]")
+	{
+		auto em = std::make_unique<ZECS::EntityManager>();
 
-	ZECS::Handle a = em->CreateEntity();
-	em->DestroyEntity(a);
+		ZECS::Handle a = em->CreateEntity();
+		em->DestroyEntity(a);
 
-	REQUIRE(em->IsAlive(a) == false);
-}
+		CaptureStdout capture;
+		em->DestroyEntity(a);
 
-TEST_CASE("Destroying an entity twice logs an error to the console", "[EntityManager]")
-{
-	auto em = std::make_unique<ZECS::EntityManager>();
-
-	ZECS::Handle a = em->CreateEntity();
-	em->DestroyEntity(a);
-
-	CaptureStdout capture;
-	em->DestroyEntity(a);
-
-	REQUIRE(capture.str().find("Error: Attempted to destroy invalid or already dead Handle") != std::string::npos);
+		REQUIRE(capture.str().find("Error: Attempted to destroy invalid or already dead Handle") != std::string::npos);
+	}
 }
