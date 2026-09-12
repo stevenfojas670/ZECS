@@ -1,6 +1,6 @@
 ## Summary
 
-Describe teh change and why it is needed.
+Describe the change and why it is needed.
 
 ## Related issues
 
