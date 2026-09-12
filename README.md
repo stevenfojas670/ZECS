@@ -1,3 +1,6 @@
+[![Tests](https://github.com/stevenfojas670/ZECS/actions/workflows/tests.yml/badge.svg?branch=main)](https://githu
+  b.com/stevenfojas670/ZECS/actions/workflows/tests.yml)
+
 ## Overview
 
 This is a custom built single-threaded header only ECS library built for my personal game engine ZiggyX.
