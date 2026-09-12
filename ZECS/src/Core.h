@@ -1,11 +1,5 @@
 #pragma once
 
-#ifdef ZECS_BUILD_DLL
-#define ZECS_API __declspec(dllexport)
-#else
-#define ZECS_API __declspec(dllimport)
-#endif
-
 namespace ZECS
 {
 	constexpr size_t MAX_ENTITIES = 1 << 16;
