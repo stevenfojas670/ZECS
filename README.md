@@ -1,5 +1,4 @@
-[![Tests](https://github.com/stevenfojas670/ZECS/actions/workflows/tests.yml/badge.svg?branch=main)](https://githu
-  b.com/stevenfojas670/ZECS/actions/workflows/tests.yml)
+[![Tests](https://github.com/stevenfojas670/ZECS/actions/workflows/tests.yml/badge.svg?branch=main)](https://github.com/stevenfojas670/ZECS/actions/workflows/tests.yml)
 
 ## Overview
 
