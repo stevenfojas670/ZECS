@@ -13,6 +13,6 @@ This is a custom built single-threaded header only ECS library built for my pers
 | `ComponentStorage` | Templated sparse set that stores the component data mapped to the entity ids.                                                                                                  |
 
 
-## Extra Tech
+## Testing
 
-- Catch2 for testing
+`Catch2` is used for testing.
