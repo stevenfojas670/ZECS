@@ -50,7 +50,7 @@ namespace ZECS
 
 		void DestroyEntity(const Handle& h)
 		{
-			unsigned short idx = index(h);
+			Entity idx = index(h);
 			Slot& currentSlot = this->m_slots[index(h)];
 
 			if (!is_valid(h, this->m_slots))

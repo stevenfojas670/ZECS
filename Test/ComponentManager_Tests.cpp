@@ -1,5 +1,6 @@
 #include <catch2/catch_test_macros.hpp>
 #include "Components/ComponentManager.h"
+#include "Entities/EntityManager.h"
 #include <memory>
 
 namespace Tests
@@ -38,5 +39,25 @@ namespace Tests
 		cm->RegisterComponent<Transform>();
 
 		REQUIRE(cm->GetComponentType<Health>() != cm->GetComponentType<Transform>());
+	}
+
+	TEST_CASE("Insert-Tests: Insert an entity with a component.", "[ComponentManager]")
+	{
+		struct Health { int value; };
+		struct Transform { int x; int y; };
+
+		auto em = std::make_unique<ZECS::EntityManager>();
+
+		ZECS::Handle ent = em->CreateEntity();
+		ZECS::Entity id = ZECS::index(ent);
+
+		auto cm = std::make_unique<ZECS::ComponentManager>();
+
+		cm->RegisterComponent<Health>();
+		cm->AddComponent<Health>(id, Health{ 100 });
+
+		auto component = cm->GetComponent<Health>(id);
+
+		REQUIRE(component.value == 100);
 	}
 }
