@@ -40,10 +40,7 @@ namespace ZECS
 	}
 
 	template <typename T>
-	ComponentStorage<T>::~ComponentStorage()
-	{
-
-	}
+	ComponentStorage<T>::~ComponentStorage() = default;
 
 	template <typename T>
 	void ComponentStorage<T>::Insert(Entity id, T data)
@@ -86,7 +83,7 @@ namespace ZECS
 	template <typename T>
 	T* ComponentStorage<T>::Get(Entity id)
 	{
-		if (id == NULL_INDEX || !Has(id)) 
+		if (id == NULL_INDEX || !Has(id))
 			return nullptr;
 
 		return &this->m_denseComponent[this->m_sparseSet[id]];

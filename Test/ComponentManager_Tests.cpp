@@ -77,4 +77,16 @@ namespace Tests
 
 		REQUIRE(cm->GetComponent<Health>(id) == nullptr);
 	}
+
+	TEST_CASE("Registering a component then unregistering and confirming it no longer exists with IsRegistered()", "[ComponentManager][UnregisterComponent]")
+	{
+		struct Health { int value; };
+
+		auto cm = std::make_unique<ZECS::ComponentManager>();
+
+		cm->RegisterComponent<Health>();
+		cm->UnregisterComponent<Health>();
+
+		REQUIRE(cm->IsRegistered<Health>() == false);
+	}
 }

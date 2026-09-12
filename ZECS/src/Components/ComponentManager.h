@@ -34,6 +34,16 @@ namespace ZECS
 		}
 
 		template <typename T>
+		void UnregisterComponent()
+		{
+			ComponentType typeId = GetComponentTypeId<T>();
+
+			if (!IsRegistered<T>()) return;
+
+			m_storages[typeId].reset();
+		}
+
+		template <typename T>
 		bool IsRegistered()
 		{
 			ComponentType typeId = GetComponentTypeId<T>();
