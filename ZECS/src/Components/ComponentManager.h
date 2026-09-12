@@ -73,7 +73,7 @@ namespace ZECS
 		{
 			ComponentType typeId = GetComponentTypeId<T>();
 
-			assert(m_storages[typeId] != nullptr);
+			assert(m_storages[typeId] != nullptr && "ComponentStorage for type T does not exist!");
 			return static_cast<ComponentStorage<T>*>(m_storages[typeId].get());
 		}
 	};
