@@ -5,7 +5,7 @@
 
 namespace Tests
 {
-	TEST_CASE("Register-Tests: Registering a component and verifying its ID.", "[ComponentManager]")
+	TEST_CASE("Getting a registered component's type returns the same id on every call", "[ComponentManager][GetComponentType]")
 	{
 		struct Health { int value; };
 
@@ -19,7 +19,7 @@ namespace Tests
 		REQUIRE(cm->GetComponentType<Health>() == healthId);
 	}
 
-	TEST_CASE("Register-Tests: Getting the component id of a non-registered component.", "[ComponentManager]")
+	TEST_CASE("Checking an unregistered component makes IsRegistered() return false", "[ComponentManager][IsRegistered]")
 	{
 		struct Health { int value; };
 
@@ -28,7 +28,7 @@ namespace Tests
 		REQUIRE(cm->IsRegistered<Health>() == false);
 	}
 
-	TEST_CASE("Register-Tests: Two different components have two different ids", "[ComponentManager]")
+	TEST_CASE("Registering two component types assigns them distinct ids", "[ComponentManager][RegisterComponent]")
 	{
 		struct Health { int value; };
 		struct Transform { int x; int y; };
@@ -41,7 +41,7 @@ namespace Tests
 		REQUIRE(cm->GetComponentType<Health>() != cm->GetComponentType<Transform>());
 	}
 
-	TEST_CASE("Insert-Tests: Insert an entity with a component.", "[ComponentManager]")
+	TEST_CASE("Adding a component to an entity makes GetComponent() return its value", "[ComponentManager][AddComponent]")
 	{
 		struct Health { int value; };
 		struct Transform { int x; int y; };

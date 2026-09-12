@@ -4,7 +4,7 @@
 
 namespace Tests
 {
-	TEST_CASE("Insert-Tests: Insert component into storage.", "[ComponentStorage]")
+	TEST_CASE("Inserting a component makes Has() return true", "[ComponentStorage][Insert]")
 	{
 		struct Health { int value; };
 
@@ -15,33 +15,33 @@ namespace Tests
 		REQUIRE(cs->Has(10));
 	}
 
-	TEST_CASE("Insert-Tests: Insert a negative id", "[ComponentStorage]")
+	TEST_CASE("Inserting a negative id wraps to a valid entity index", "[ComponentStorage][Insert]")
 	{
 		struct Health { int value; };
 
 		auto cs = std::make_unique<ZECS::ComponentStorage<Health>>();
 
-		int id = -10;
+		int id = -10; // Entity is unsigned short, so -10 converts to 65526, a valid index
 
 		cs->Insert(id, Health{ 100 });
 
 		REQUIRE(cs->Has(id) == true);
 	}
 
-	TEST_CASE("Insert-Tests: Insert more than the maximum allowable components", "[ComponentStorage]")
+	TEST_CASE("Inserting at NULL_INDEX is rejected", "[ComponentStorage][Insert]")
 	{
 		struct Health { int value; };
 
 		auto cs = std::make_unique<ZECS::ComponentStorage<Health>>();
 
-		int id = 65535;
+		int id = 65535; // 65535 == NULL_INDEX, which Insert rejects
 
 		cs->Insert(id, Health{ 100 });
 
 		REQUIRE(cs->Has(id) == false);
 	}
 
-	TEST_CASE("Insert-Tests: Random insertions", "[ComponentStorage]")
+	TEST_CASE("Removing one component from a heavily populated storage makes Has() return false", "[ComponentStorage][Remove]")
 	{
 		struct Health { int value; };
 
@@ -57,7 +57,7 @@ namespace Tests
 		REQUIRE(cs->Has(800) == false);
 	}
 
-	TEST_CASE("Insert-Tests: Backfill testing", "[ComponentStorage]")
+	TEST_CASE("Inserting after removals keeps new components retrievable", "[ComponentStorage][Insert]")
 	{
 		struct Health { int value; };
 
@@ -83,7 +83,7 @@ namespace Tests
 		REQUIRE(cs->Size() == 3);
 	}
 
-	TEST_CASE("Remove-Tests: Remove a non-last component", "[ComponentStorage]")
+	TEST_CASE("Removing a non-last component makes Has() false and shrinks Size()", "[ComponentStorage][Remove]")
 	{
 		struct Health { int value; };
 
@@ -98,7 +98,7 @@ namespace Tests
 		REQUIRE(cs->Size() == 1);
 	}
 
-	TEST_CASE("Remove-Tests: Remove the last component", "[ComponentStorage]")
+	TEST_CASE("Removing the last component makes Has() return false", "[ComponentStorage][Remove]")
 	{
 		struct Health { int value; };
 
@@ -112,7 +112,7 @@ namespace Tests
 		REQUIRE(cs->Has(1) == false);
 	}
 
-	TEST_CASE("Remove-Tests: Remove a non-existent component", "[ComponentStorage]")
+	TEST_CASE("Removing a component that was never inserted leaves Has() false", "[ComponentStorage][Remove]")
 	{
 		struct Health { int value; };
 
