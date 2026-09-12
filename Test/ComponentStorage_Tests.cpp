@@ -1,5 +1,5 @@
 #include <catch2/catch_test_macros.hpp>
-#include "ComponentStorage.h"
+#include "Components/ComponentStorage.h"
 #include <memory>
 
 namespace Tests

@@ -9,6 +9,7 @@
 namespace ZECS
 {
 	constexpr size_t MAX_ENTITIES = 1 << 16;
+	constexpr size_t MAX_COMPONENTS = 256;
 
 	struct Handle
 	{
@@ -48,4 +49,6 @@ namespace ZECS
 		unsigned short gen = generation(h);
 		return slots[idx].isOccupied && slots[idx].generation == gen;
 	}
+
+	using ComponentType = unsigned int;
 }

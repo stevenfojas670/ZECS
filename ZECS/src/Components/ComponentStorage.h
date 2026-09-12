@@ -4,8 +4,14 @@
 
 namespace ZECS
 {
+	class IComponentStorage
+	{
+	public:
+		virtual ~IComponentStorage() = default;
+	};
+
 	template <typename T>
-	class ComponentStorage
+	class ComponentStorage : public IComponentStorage
 	{
 	public:
 		ComponentStorage();

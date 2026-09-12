@@ -1,5 +1,5 @@
 #include <catch2/catch_test_macros.hpp>
-#include "EntityManager.h"
+#include "Entities/EntityManager.h"
 #include "Helpers.h"
 
 namespace Tests

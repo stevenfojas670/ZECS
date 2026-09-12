@@ -1,8 +1,9 @@
 add_library(ZECS SHARED
     src/Core.h
-    src/EntityManager.h
-    src/EntityManager.cpp
-    src/ComponentStorage.h
+    src/Entities/EntityManager.h
+    src/Entities/EntityManager.cpp
+    src/Components/ComponentStorage.h
+    src/Components/ComponentManager.h
 )
 
 # PUBLIC: consumers of ZECS inherit this include path automatically.
