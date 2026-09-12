@@ -54,13 +54,15 @@ namespace ZECS
 		}
 
 		template <typename T>
-		T& GetComponent(Entity id)
+		T* GetComponent(Entity id)
 		{
-			auto comp = GetStorage<T>()->Get(id);
+			return GetStorage<T>()->Get(id);
+		}
 
-			assert(comp != nullptr && "Entity does not have this component!");
-
-			return *comp;
+		template <typename T>
+		void RemoveComponent(Entity id)
+		{
+			GetStorage<T>()->Remove(id);
 		}
 
 	private:

@@ -58,6 +58,23 @@ namespace Tests
 
 		auto component = cm->GetComponent<Health>(id);
 
-		REQUIRE(component.value == 100);
+		REQUIRE(component->value == 100);
+	}
+
+	TEST_CASE("Adding a component and removing then verifying it no longer exists with GetComponent()", "[ComponentManager][RemoveComponent]")
+	{
+		struct Health { int value; };
+
+		auto em = std::make_unique<ZECS::EntityManager>();
+		auto cm = std::make_unique<ZECS::ComponentManager>();
+
+		ZECS::Handle h = em->CreateEntity();
+		ZECS::Entity id = ZECS::index(h);
+
+		cm->RegisterComponent<Health>();
+		cm->AddComponent<Health>(id, Health{ 100 });
+		cm->RemoveComponent<Health>(id);
+
+		REQUIRE(cm->GetComponent<Health>(id) == nullptr);
 	}
 }
