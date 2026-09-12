@@ -1,29 +1,29 @@
 #pragma once
 
-#ifdef ZECS_BUILD_DLL
-#define ZECS_API __declspec(dllexport)
-#else
-#define ZECS_API __declspec(dllimport)
-#endif
+#include <cassert>
 
 namespace ZECS
 {
 	constexpr size_t MAX_ENTITIES = 1 << 16;
+	constexpr size_t MAX_COMPONENTS = 256;
 
 	struct Handle
 	{
 		unsigned int id; // [generation:16][index:16]
 	};
 
+	using Entity = unsigned short;
+	using Generation = unsigned short;
+
 	constexpr unsigned short INDEX_MASK = 0xFFFF;
 	constexpr unsigned short GENERATION_SHIFT = 16;
 
-	inline unsigned short index(const Handle& h)
+	inline Entity index(const Handle& h)
 	{
 		return h.id & INDEX_MASK;
 	}
 
-	inline unsigned short generation(const Handle& h)
+	inline Generation generation(const Handle& h)
 	{
 		return h.id >> GENERATION_SHIFT;
 	}
@@ -44,8 +44,10 @@ namespace ZECS
 
 	inline bool is_valid(const Handle& h, const Slot* slots)
 	{
-		unsigned short idx = index(h);
-		unsigned short gen = generation(h);
+		Entity idx = index(h);
+		Generation gen = generation(h);
 		return slots[idx].isOccupied && slots[idx].generation == gen;
 	}
+
+	using ComponentType = unsigned int;
 }

@@ -1,10 +1,10 @@
 #include <catch2/catch_test_macros.hpp>
-#include "EntityManager.h"
+#include "Entities/EntityManager.h"
 #include "Helpers.h"
 
 namespace Tests
 {
-	TEST_CASE("Distinct live entities occupy distinct slots", "[EntityManager]")
+	TEST_CASE("Creating two entities assigns them distinct indices", "[EntityManager][CreateEntity]")
 	{
 		// Heap-allocated: EntityManager embeds Slot[65536] (~384 KB), which is more
 		// than belongs on the default 1 MB stack.
@@ -16,7 +16,7 @@ namespace Tests
 		REQUIRE(ZECS::index(a) != ZECS::index(b));
 	}
 
-	TEST_CASE("Remove a single entity", "[EntityManager]")
+	TEST_CASE("Destroying an entity frees its slot and increments its generation", "[EntityManager][DestroyEntity]")
 	{
 		auto em = std::make_unique<ZECS::EntityManager>();
 
@@ -39,7 +39,7 @@ namespace Tests
 		REQUIRE(em->GetFreeListHead() == 1);
 	}
 
-	TEST_CASE("Remove multiple entities", "[EntityManager]")
+	TEST_CASE("Destroying two entities links the second freed slot to the first", "[EntityManager][DestroyEntity]")
 	{
 		auto em = std::make_unique<ZECS::EntityManager>();
 
@@ -55,7 +55,7 @@ namespace Tests
 		REQUIRE(slot.next_free == 0);
 	}
 
-	TEST_CASE("Remove multiple entities and backfill", "[EntityManager]")
+	TEST_CASE("Creating entities after destroys reuses freed slots in LIFO order", "[EntityManager][CreateEntity]")
 	{
 		auto em = std::make_unique<ZECS::EntityManager>();
 
@@ -85,7 +85,7 @@ namespace Tests
 		REQUIRE(ZECS::index(d) == ZECS::index(b));
 	}
 
-	TEST_CASE("Detect multiple generations", "[EntityManager]")
+	TEST_CASE("Destroying a reused slot increments its generation to 2", "[EntityManager][DestroyEntity]")
 	{
 		auto em = std::make_unique<ZECS::EntityManager>();
 
@@ -103,7 +103,7 @@ namespace Tests
 		REQUIRE(slot.generation == 2);
 	}
 
-	TEST_CASE("Detect a stale entity", "[EntityManager]")
+	TEST_CASE("A destroyed handle is no longer alive", "[EntityManager][IsAlive]")
 	{
 		auto em = std::make_unique<ZECS::EntityManager>();
 
@@ -113,7 +113,7 @@ namespace Tests
 		REQUIRE(em->IsAlive(a) == false);
 	}
 
-	TEST_CASE("Destroying an entity twice logs an error to the console", "[EntityManager]")
+	TEST_CASE("Destroying an entity twice logs an error to the console", "[EntityManager][DestroyEntity]")
 	{
 		auto em = std::make_unique<ZECS::EntityManager>();
 

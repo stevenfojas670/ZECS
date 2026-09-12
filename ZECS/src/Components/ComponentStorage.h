@@ -4,16 +4,22 @@
 
 namespace ZECS
 {
+	class IComponentStorage
+	{
+	public:
+		virtual ~IComponentStorage() = default;
+	};
+
 	template <typename T>
-	class ComponentStorage
+	class ComponentStorage : public IComponentStorage
 	{
 	public:
 		ComponentStorage();
 		~ComponentStorage();
-		void Insert(unsigned short id, T data);
-		void Remove(unsigned short id);
-		bool Has(unsigned short id) const;
-		T* Get(unsigned short id);
+		void Insert(Entity id, T data);
+		void Remove(Entity id);
+		bool Has(Entity id) const;
+		T* Get(Entity id);
 		int Size() const { return size; }
 	private:
 		unsigned short m_sparseSet[MAX_ENTITIES];
@@ -34,13 +40,10 @@ namespace ZECS
 	}
 
 	template <typename T>
-	ComponentStorage<T>::~ComponentStorage()
-	{
-
-	}
+	ComponentStorage<T>::~ComponentStorage() = default;
 
 	template <typename T>
-	void ComponentStorage<T>::Insert(unsigned short id, T data)
+	void ComponentStorage<T>::Insert(Entity id, T data)
 	{
 		if (id == NULL_INDEX) return;
 		this->m_denseComponent[size] = data;
@@ -50,11 +53,11 @@ namespace ZECS
 	}
 
 	template <typename T>
-	void ComponentStorage<T>::Remove(unsigned short id)
+	void ComponentStorage<T>::Remove(Entity id)
 	{
 		if (!Has(id)) return;
 
-		unsigned short idx = this->m_sparseSet[id];
+		Entity idx = this->m_sparseSet[id];
 		int last = size - 1;
 
 		if (idx != last)
@@ -71,16 +74,18 @@ namespace ZECS
 	}
 
 	template <typename T>
-	bool ComponentStorage<T>::Has(unsigned short id) const
+	bool ComponentStorage<T>::Has(Entity id) const
 	{
 		if (id == NULL_INDEX) return false;
 		return this->m_sparseSet[id] < size && this->m_denseId[this->m_sparseSet[id]] == id;
 	}
 
 	template <typename T>
-	T* ComponentStorage<T>::Get(unsigned short id)
+	T* ComponentStorage<T>::Get(Entity id)
 	{
-		if (id == NULL_INDEX) return nullptr;
+		if (id == NULL_INDEX || !Has(id))
+			return nullptr;
+
 		return &this->m_denseComponent[this->m_sparseSet[id]];
 	}
 }
