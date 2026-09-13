@@ -6,15 +6,6 @@
 
 namespace ZECS
 {
-	namespace internal
-	{
-		inline ComponentType GetComponentId()
-		{
-			static ComponentType s_componentId = 1;
-			return s_componentId++;
-		}
-	}
-
 	template <typename T>
 	inline ComponentType GetComponentTypeId()
 	{

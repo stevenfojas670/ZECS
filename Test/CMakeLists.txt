@@ -9,10 +9,16 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(Catch2)
 
 add_executable(Test
-    EntityManager_Tests.cpp
-    ComponentStorage_Tests.cpp
-    ComponentManager_Tests.cpp
+    Entities/EntityManager_Tests.cpp
+    Components/ComponentStorage_Tests.cpp
+    Components/ComponentManager_Tests.cpp
+    Systems/SystemManager_Tests.cpp
+    Systems/Systems.h
 )
+
+# Test/ is the include root for test-only headers, so files in any subfolder
+# reach shared helpers as "Helpers.h" rather than a relative ../ path.
+target_include_directories(Test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 
 # Catch2WithMain supplies main(), so no test file declares one.
 target_link_libraries(Test PRIVATE ZECS Catch2::Catch2WithMain)

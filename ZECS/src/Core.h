@@ -6,6 +6,7 @@ namespace ZECS
 {
 	constexpr size_t MAX_ENTITIES = 1 << 16;
 	constexpr size_t MAX_COMPONENTS = 256;
+	constexpr size_t MAX_SYSTEMS = 256;
 
 	struct Handle
 	{
@@ -14,6 +15,8 @@ namespace ZECS
 
 	using Entity = unsigned short;
 	using Generation = unsigned short;
+	using ComponentType = unsigned int;
+	using SystemType = unsigned int;
 
 	constexpr unsigned short INDEX_MASK = 0xFFFF;
 	constexpr unsigned short GENERATION_SHIFT = 16;
@@ -49,5 +52,18 @@ namespace ZECS
 		return slots[idx].isOccupied && slots[idx].generation == gen;
 	}
 
-	using ComponentType = unsigned int;
+	namespace internal
+	{
+		inline ComponentType GetComponentId()
+		{
+			static ComponentType s_componentId = 1;
+			return s_componentId++;
+		}
+
+		inline SystemType GetSystemId()
+		{
+			static SystemType s_systemId = 1;
+			return s_systemId++;
+		}
+	}
 }
