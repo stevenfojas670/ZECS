@@ -21,7 +21,7 @@ namespace ZECS
 		void RegisterComponent()
 		{
 			ComponentType typeId = GetComponentTypeId<T>();
-			this->m_storages[typeId] = std::make_unique<ComponentStorage<T>>();
+			m_storages[typeId] = std::make_unique<ComponentStorage<T>>();
 		}
 
 		template <typename T>
@@ -39,7 +39,7 @@ namespace ZECS
 		{
 			ComponentType typeId = GetComponentTypeId<T>();
 
-			return this->m_storages[typeId] != nullptr ? true : false;
+			return m_storages[typeId] != nullptr ? true : false;
 		}
 
 		template <typename T>
