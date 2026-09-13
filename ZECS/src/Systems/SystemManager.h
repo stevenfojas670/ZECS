@@ -27,6 +27,7 @@ namespace ZECS
 		void RegisterSystem()
 		{
 			SystemType typeId = GetSystemTypeId<T>();
+			assert(m_systems[typeId] != nullptr && "Duplicate registration!");
 			m_systems[typeId] = std::make_unique<T>();
 		}
 

@@ -25,4 +25,16 @@ namespace Tests
 
 		REQUIRE(ms == nullptr);
 	}
+
+	// Register two systems and verify they have different pointers
+
+	// Call GetComponent<T>() twice and verify that the pointers are the same
+
+	// Generate two SystemManagers and register a system into one and verify the id is the same for both
+
+	// Register a system twice and verify the pointer does not change (We want idempotency)
+
+	// Verify calling update is called exactly once per system
+
+	// Create more than MAX_SYSTEMS and see what happens
 }
